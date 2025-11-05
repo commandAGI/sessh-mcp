@@ -91,6 +91,60 @@ npm run build
 npm run dev
 ```
 
+## Example Workflow
+
+Once configured in Cursor, you can use sessh tools directly:
+
+1. **Open a session**:
+   - Tool: `open`
+   - Parameters: `{ "alias": "agent", "host": "ubuntu@203.0.113.10" }`
+
+2. **Run commands**:
+   - Tool: `run`
+   - Parameters: `{ "alias": "agent", "host": "ubuntu@203.0.113.10", "command": "conda activate env && python train.py" }`
+
+3. **Check logs**:
+   - Tool: `logs`
+   - Parameters: `{ "alias": "agent", "host": "ubuntu@203.0.113.10", "lines": 400 }`
+
+4. **Check status**:
+   - Tool: `status`
+   - Parameters: `{ "alias": "agent", "host": "ubuntu@203.0.113.10" }`
+
+5. **Close session**:
+   - Tool: `close`
+   - Parameters: `{ "alias": "agent", "host": "ubuntu@203.0.113.10" }`
+
+## Architecture
+
+The MCP server is a thin wrapper around the `sessh` CLI:
+
+1. **Receives MCP tool calls** via stdio transport
+2. **Spawns `sessh` CLI** with appropriate arguments
+3. **Parses JSON responses** from `sessh`
+4. **Returns structured MCP responses** to the client
+
+All operations force JSON mode (`SESSH_JSON=1`) for reliable parsing.
+
+## Troubleshooting
+
+**"sessh: command not found"**
+- Ensure `sessh` CLI is installed and on PATH
+- Or set `SESSH_BIN` environment variable in Cursor config
+
+**Tool execution fails**
+- Check that `sessh` CLI works from command line
+- Verify SSH key is configured correctly
+- Check that remote host has tmux installed
+
+**JSON parsing errors**
+- Ensure `SESSH_JSON=1` is set (done automatically by MCP server)
+- Check that `sessh` CLI supports JSON output
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
 ## Related Projects
 
 - [sessh](https://github.com/CommandAGI/sessh) - Core CLI
