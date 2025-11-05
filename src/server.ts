@@ -165,6 +165,58 @@ server.tool(
   }
 );
 
+server.tool(
+  new Tool({
+    name: "keys",
+    description: "Send individual key events to the tmux session (no Enter key). Useful for interactive TUI programs like vim or nano.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        alias: { type: "string", description: "Session alias name" },
+        host: { type: "string", description: "SSH host (user@host)" },
+        keys: { type: "string", description: "Key sequence to send (e.g., 'j', 'k', 'C-x', 'Esc', etc.)" }
+      },
+      required: ["alias", "host", "keys"]
+    }
+  }),
+  async (args) => {
+    const { alias, host, keys } = args as { alias: string; host: string; keys: string };
+    const res = await runSessh(["keys", alias, host, "--", keys]);
+    ensureOk("keys", res);
+    return { content: [{ type: "json", data: JSON.parse(res.stdout) }] };
+  }
+);
+
+server.tool(
+  new Tool({
+    name: "pane",
+    description: "Read the current pane state from the tmux session. Useful for reading the current state of interactive TUI programs.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        alias: { type: "string", description: "Session alias name" },
+        host: { type: "string", description: "SSH host (user@host)" },
+        lines: { type: "number", description: "Number of lines to capture (default: 300)", default: 300 }
+      },
+      required: ["alias", "host"]
+    }
+  }),
+  async (args) => {
+    const { alias, host, lines } = args as { alias: string; host: string; lines?: number };
+    const sesshArgs = ["pane", alias, host];
+    if (lines) sesshArgs.push(String(lines));
+    const res = await runSessh(sesshArgs);
+    ensureOk("pane", res);
+    const data = JSON.parse(res.stdout);
+    return {
+      content: [
+        { type: "json", data },
+        { type: "text", text: (data.output?.slice(-8000) ?? "").toString() } // also mirror as text (truncated)
+      ]
+    };
+  }
+);
+
 const transport = new StdioServerTransport();
 server.connect(transport).catch((e) => {
   console.error("fatal:", e);

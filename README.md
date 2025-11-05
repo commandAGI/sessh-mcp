@@ -78,6 +78,22 @@ Kill tmux session and close the controlmaster.
 - `host` (string): SSH host (user@host)
 - `port` (number, optional): SSH port (default: 22)
 
+### `keys`
+Send individual key events to the tmux session (no Enter key). Useful for interactive TUI programs like vim or nano.
+
+**Parameters:**
+- `alias` (string): Session alias name
+- `host` (string): SSH host (user@host)
+- `keys` (string): Key sequence to send (e.g., 'j', 'k', 'C-x', 'Esc', etc.)
+
+### `pane`
+Read the current pane state from the tmux session. Useful for reading the current state of interactive TUI programs.
+
+**Parameters:**
+- `alias` (string): Session alias name
+- `host` (string): SSH host (user@host)
+- `lines` (number, optional): Number of lines to capture (default: 300)
+
 ## Development
 
 ```bash
@@ -114,6 +130,27 @@ Once configured in Cursor, you can use sessh tools directly:
 5. **Close session**:
    - Tool: `close`
    - Parameters: `{ "alias": "agent", "host": "ubuntu@203.0.113.10" }`
+
+**Interactive TUI Programs:**
+
+For working with vim, nano, or other TUI programs:
+
+1. **Open session and launch TUI program**:
+   - Tool: `open`, then `run`
+   - Parameters: `{ "alias": "editor", "host": "ubuntu@host" }`
+   - Then: `{ "alias": "editor", "host": "ubuntu@host", "command": "vim file.txt" }`
+
+2. **Read current pane state**:
+   - Tool: `pane`
+   - Parameters: `{ "alias": "editor", "host": "ubuntu@host", "lines": 30 }`
+
+3. **Send key sequences**:
+   - Tool: `keys`
+   - Parameters: `{ "alias": "editor", "host": "ubuntu@host", "keys": "i" }` (enter insert mode)
+   - Parameters: `{ "alias": "editor", "host": "ubuntu@host", "keys": "Hello" }` (type text)
+   - Parameters: `{ "alias": "editor", "host": "ubuntu@host", "keys": "Esc" }` (exit insert mode)
+   - Parameters: `{ "alias": "editor", "host": "ubuntu@host", "keys": ":wq" }` (save and quit)
+   - Parameters: `{ "alias": "editor", "host": "ubuntu@host", "keys": "Enter" }` (confirm)
 
 ## Architecture
 
